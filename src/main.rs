@@ -8,6 +8,11 @@ mod cli;
 
 use cli::{Opt, StructOpt};
 
+fn get_standup_notes(project_code: &str) {
+    // generate path from project_code, then pass this into edit()
+    todo!();
+}
+
 fn edit(editor: &str, sup_dir: &str, project_code: &str) -> io::Result<process::ExitStatus> {
     let sfilename = format!("{}.md", project_code);
     let spath = Path::new(sup_dir).join(sfilename);
@@ -39,4 +44,12 @@ fn main() {
             1
         }
     });
+}
+
+#[cfg(test)]
+mod test {
+    use super::edit;
+
+    #[test]
+    fn test_edit() {}
 }
