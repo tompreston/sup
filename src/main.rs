@@ -28,7 +28,7 @@ fn show(spath: PathBuf, next_engineer: &str) -> io::Result<()> {
     // Now print the next engineer name
     let next_engs: Vec<&str> = snotes
         .lines()
-        .filter(|l| l.starts_with("#"))
+        .filter(|l| l.starts_with('#'))
         .filter(|l| l.contains(next_engineer))
         .collect();
     for e in next_engs.iter() {
