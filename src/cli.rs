@@ -5,7 +5,7 @@ pub use structopt::StructOpt;
 /// Options for the sup program
 #[derive(StructOpt, Debug)]
 #[structopt(about = "An IRC standup log parser")]
-pub struct Opt {
+pub struct StandupOpt {
     /// The editor we should use to open standup logs.
     #[structopt(short, long, env)]
     pub editor: String,
@@ -15,11 +15,11 @@ pub struct Opt {
     pub sup_dir: String,
 
     #[structopt(subcommand)]
-    pub command: Command,
+    pub command: StandupCmd,
 }
 
 #[derive(StructOpt, Debug)]
-pub enum Command {
+pub enum StandupCmd {
     /// Edit the standup notes for the given project
     Edit { project_code: String },
 
