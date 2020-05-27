@@ -1,5 +1,6 @@
 //! An IRC standup parser.
 use std::error::Error;
+use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process;
@@ -14,22 +15,45 @@ fn sup_notes_path(sup_dir: &str, project_code: &str) -> PathBuf {
 }
 
 /// Open the standup notes for editing
-fn edit(editor: &str, spath: PathBuf) -> io::Result<process::ExitStatus> {
-    process::Command::new(editor).arg(spath).status()
+fn edit(editor: &str, spath: PathBuf) -> io::Result<()> {
+    process::Command::new(editor).arg(spath).status()?;
+    Ok(())
 }
 
-fn show(spath: PathBuf) -> io::Result {
-    unimplemented!();
+/// Show the standup notes, followed by the next_engineer (search string)
+fn show(spath: PathBuf, next_engineer: &str) -> io::Result<()> {
+    let snotes = fs::read_to_string(spath)?;
+    println!("{}", snotes.trim());
+
+    // Now print the next engineer name
+    let next_engs: Vec<&str> = snotes
+        .lines()
+        .filter(|l| l.starts_with("#"))
+        .filter(|l| l.contains(next_engineer))
+        .collect();
+    for e in next_engs.iter() {
+        println!("{}", e);
+    }
+
+    Ok(())
 }
 
 /// Perform standup actions
 fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
-    let snotes = sup_notes_path(opt.sup_dir.as_str(), project_code.as_str());
-    dbg!(opt, snotes);
+    dbg!(opt);
 
     match &opt.command {
-        StandupCmd::Edit { project_code } => edit(opt.editor.as_str(), snotes),
-        StandupCmd::Show { project_code } => show(snotes),
+        StandupCmd::Edit { project_code } => {
+            let snotes = sup_notes_path(opt.sup_dir.as_str(), project_code.as_str());
+            edit(opt.editor.as_str(), snotes)
+        }
+        StandupCmd::Show {
+            project_code,
+            next_engineer,
+        } => {
+            let snotes = sup_notes_path(opt.sup_dir.as_str(), project_code.as_str());
+            show(snotes, next_engineer.as_str())
+        }
         _ => unimplemented!(),
     }?;
     Ok(())

@@ -26,6 +26,8 @@ pub enum StandupCmd {
     /// Print a project's standup notes and append the next engineer's name
     Show {
         project_code: String,
+
+        /// A search string for the next engineer, or "# Discussion"
         next_engineer: String,
     },
 
