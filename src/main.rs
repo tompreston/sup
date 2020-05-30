@@ -7,8 +7,10 @@ use std::path::{Path, PathBuf};
 use std::process;
 
 mod cli;
+mod irclog;
 
 use cli::{StandupCmd, StandupOpt, StructOpt};
+use irclog::IrcLogWeechat;
 
 #[derive(Debug)]
 enum StandupError {
@@ -75,43 +77,8 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 fn format_irc_log(irc_log_path: &PathBuf) -> Result<(), StandupError> {
     dbg!(irc_log_path);
 
-    let log = fs::read_to_string(irc_log_path)?;
-    let log_len = log.lines().count();
-
-    // Find the last standup position (start and end)
-    let start_str = "# William";
-    let discussion_str = "# Discussion";
-    let end_str = "tandup ends";
-
-    let mut log_rlines = log.lines().rev();
-    let end = log_len
-        - log_rlines
-            .position(|l| l.contains(end_str))
-            .ok_or(StandupError::IrcStandupNotFound(end_str.to_string()))?;
-    let discussion = log_len
-        - log_rlines
-            .position(|l| l.contains(discussion_str))
-            .ok_or(StandupError::IrcStandupNotFound(discussion_str.to_string()))?;
-    let start = log_len
-        - log_rlines
-            .position(|l| l.contains(start_str))
-            .ok_or(StandupError::IrcStandupNotFound(start_str.to_string()))?;
-
-    dbg!(start, discussion, end);
-    for (i, line) in log.lines().enumerate() {
-        if i >= start && i < end {
-            let mut split_line = line.split("\t");
-            if i <= discussion {
-                println!("{}", split_line.nth(2).unwrap_or(""));
-            } else {
-                println!(
-                    "{}\t{}",
-                    split_line.nth(1).unwrap_or(""),
-                    split_line.next().unwrap_or("")
-                );
-            }
-        }
-    }
+    let irc_log = IrcLogWeechat::from_file(irc_log_path);
+    dbg!(irc_log);
 
     Ok(())
 }
@@ -119,6 +86,18 @@ fn format_irc_log(irc_log_path: &PathBuf) -> Result<(), StandupError> {
 fn print_irc_logs(logs: Vec<PathBuf>) {
     for l in logs {
         println!("{}", l.to_string_lossy())
+    }
+}
+
+fn format(sup_dir_irc_logs: &str, pattern: &str) -> Result<(), StandupError> {
+    let mut logs = find_irc_log_path(sup_dir_irc_logs, pattern)?;
+    if logs.len() == 0 {
+        Ok(println!("No IRC logs found"))
+    } else if logs.len() == 1 {
+        format_irc_log(&logs[0])
+    } else {
+        logs.sort();
+        Ok(print_irc_logs(logs))
     }
 }
 
@@ -138,17 +117,7 @@ fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
             sup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
             next_engineer.as_str(),
         ),
-        StandupCmd::Format { pattern } => {
-            let mut logs = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern.as_str())?;
-            if logs.len() == 0 {
-                Ok(println!("No IRC logs found"))
-            } else if logs.len() == 1 {
-                format_irc_log(&logs[0])
-            } else {
-                logs.sort();
-                Ok(print_irc_logs(logs))
-            }
-        }
+        StandupCmd::Format { pattern } => format(opt.sup_dir_irc_logs.as_str(), pattern.as_str()),
         _ => unimplemented!(),
     }?;
     Ok(())
