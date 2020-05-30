@@ -35,11 +35,12 @@ pub enum StandupCmd {
         next_engineer: String,
     },
 
-    /// List IRC logs
-    List,
-
-    /// Scrape and print the last standup from this project's IRC log
-    Format { project_code: String },
+    /// Scrape and print the last standup from this project's IRC log. Use the
+    /// pattern to select the log to scrape. See list command.
+    Format {
+        #[structopt(default_value = "")]
+        pattern: String,
+    },
 
     /// Attempt to push the standup log_path to its wiki
     Push { log_path: PathBuf },
