@@ -39,8 +39,12 @@ fn show(spath: PathBuf, next_engineer: &str) -> io::Result<()> {
 }
 
 fn list(sup_irc_log_dir: &str) -> io::Result<()> {
-    for entry in fs::read_dir(sup_irc_log_dir)? {
-        println!("{}", entry?.path().to_string_lossy());
+    let mut entries = fs::read_dir(sup_irc_log_dir)?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()?;
+    entries.sort();
+    for e in entries {
+        println!("{}", e.to_string_lossy());
     }
     Ok(())
 }
