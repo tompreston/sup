@@ -10,8 +10,8 @@ mod cli;
 use cli::{StandupCmd, StandupOpt, StructOpt};
 
 /// Returns path to standup notes generated from standup dir and project code
-fn sup_notes_path(sup_dir: &str, project_code: &str) -> PathBuf {
-    Path::new(sup_dir).join(format!("{}.md", project_code))
+fn sup_notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
+    Path::new(sup_dir_notes).join(format!("{}.md", project_code))
 }
 
 /// Open the standup notes for editing
@@ -38,22 +38,34 @@ fn show(spath: PathBuf, next_engineer: &str) -> io::Result<()> {
     Ok(())
 }
 
+fn list(sup_irc_log_dir: &str) -> io::Result<()> {
+    for entry in fs::read_dir(sup_irc_log_dir)? {
+        println!("{}", entry?.path().to_string_lossy());
+    }
+    Ok(())
+}
+
+/// Returns an IRC log path, which is the fmt with the inserted project code
+//fn irc_log_path(project_code: &str) -> PathBuf {}
+
 /// Perform standup actions
 fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
     dbg!(opt);
 
     match &opt.command {
-        StandupCmd::Edit { project_code } => {
-            let snotes = sup_notes_path(opt.sup_dir.as_str(), project_code.as_str());
-            edit(opt.editor.as_str(), snotes)
-        }
+        StandupCmd::Edit { project_code } => edit(
+            opt.editor.as_str(),
+            sup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
+        ),
         StandupCmd::Show {
             project_code,
             next_engineer,
-        } => {
-            let snotes = sup_notes_path(opt.sup_dir.as_str(), project_code.as_str());
-            show(snotes, next_engineer.as_str())
-        }
+        } => show(
+            sup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
+            next_engineer.as_str(),
+        ),
+        StandupCmd::List => list(opt.sup_dir_irc_logs.as_str()),
+        //StandupCmd::Format { project_code } => format_irc_log(irc_log_path(project_code.as_str())),
         _ => unimplemented!(),
     }?;
     Ok(())

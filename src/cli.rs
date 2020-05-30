@@ -35,6 +35,9 @@ pub enum StandupCmd {
         next_engineer: String,
     },
 
+    /// List IRC logs
+    List,
+
     /// Scrape and print the last standup from this project's IRC log
     Format { project_code: String },
 
