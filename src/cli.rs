@@ -11,8 +11,12 @@ pub struct StandupOpt {
     pub editor: String,
 
     /// The directory where the standup logs are kept.
-    #[structopt(short, long, env)]
-    pub sup_dir: String,
+    #[structopt(short = "n", long, env)]
+    pub sup_dir_notes: String,
+
+    /// The IRC log directory
+    #[structopt(short = "l", long, env)]
+    pub sup_dir_irc_logs: String,
 
     #[structopt(subcommand)]
     pub command: StandupCmd,
