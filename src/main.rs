@@ -1,39 +1,16 @@
 //! An IRC standup parser.
 use std::error::Error;
-use std::fmt;
 use std::fs;
-use std::io;
 use std::path::{Path, PathBuf};
 use std::process;
 
 mod cli;
 mod irclog;
+mod standup_error;
 
 use cli::{StandupCmd, StandupOpt, StructOpt};
 use irclog::IrcLogWeechat;
-
-#[derive(Debug)]
-enum StandupError {
-    IO(io::Error),
-    IrcStandupNotFound(String),
-}
-
-impl fmt::Display for StandupError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            StandupError::IO(e) => write!(f, "IO error: {}", e),
-            StandupError::IrcStandupNotFound(s) => write!(f, "IRC standup not found: {}", s),
-        }
-    }
-}
-
-impl Error for StandupError {}
-
-impl From<io::Error> for StandupError {
-    fn from(err: io::Error) -> StandupError {
-        StandupError::IO(err)
-    }
-}
+use standup_error::StandupError;
 
 /// Returns path to standup notes generated from standup dir and project code
 fn sup_notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
@@ -74,13 +51,15 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 }
 
 /// Format the IRC log path
-fn format_irc_log(irc_log_path: &PathBuf) -> Result<(), StandupError> {
+fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
     dbg!(irc_log_path);
 
-    let irc_log = IrcLogWeechat::from_file(irc_log_path);
-    dbg!(irc_log);
-
-    Ok(())
+    let irc_log = IrcLogWeechat::from_file(irc_log_path)?;
+    irc_log.print_last_standup(
+        opt.sup_pattern_begin.as_str(),
+        opt.sup_pattern_discussion.as_str(),
+        opt.sup_pattern_end.as_str(),
+    )
 }
 
 fn print_irc_logs(logs: Vec<PathBuf>) {
@@ -89,12 +68,12 @@ fn print_irc_logs(logs: Vec<PathBuf>) {
     }
 }
 
-fn format(sup_dir_irc_logs: &str, pattern: &str) -> Result<(), StandupError> {
-    let mut logs = find_irc_log_path(sup_dir_irc_logs, pattern)?;
+fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
+    let mut logs = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
     if logs.len() == 0 {
         Ok(println!("No IRC logs found"))
     } else if logs.len() == 1 {
-        format_irc_log(&logs[0])
+        format_irc_log(opt, &logs[0])
     } else {
         logs.sort();
         Ok(print_irc_logs(logs))
@@ -117,7 +96,7 @@ fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
             sup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
             next_engineer.as_str(),
         ),
-        StandupCmd::Format { pattern } => format(opt.sup_dir_irc_logs.as_str(), pattern.as_str()),
+        StandupCmd::Format { irc_log_pattern } => format(&opt, irc_log_pattern.as_str()),
         _ => unimplemented!(),
     }?;
     Ok(())

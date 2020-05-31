@@ -18,6 +18,18 @@ pub struct StandupOpt {
     #[structopt(short = "l", long, env)]
     pub sup_dir_irc_logs: String,
 
+    /// The begin pattern for standups
+    #[structopt(long, env)]
+    pub sup_pattern_begin: String,
+
+    /// The discussion pattern for standups
+    #[structopt(long, env, default_value = "# Discussion")]
+    pub sup_pattern_discussion: String,
+
+    /// The end pattern for standups
+    #[structopt(long, env, default_value = "tandup ends")]
+    pub sup_pattern_end: String,
+
     #[structopt(subcommand)]
     pub command: StandupCmd,
 }
@@ -39,7 +51,7 @@ pub enum StandupCmd {
     /// pattern to select the log to scrape. See list command.
     Format {
         #[structopt(default_value = "")]
-        pattern: String,
+        irc_log_pattern: String,
     },
 
     /// Attempt to push the standup log_path to its wiki
