@@ -1,5 +1,4 @@
 //! The sup command line interface (CLI).
-use std::path::PathBuf;
 pub use structopt::StructOpt;
 
 /// Options for the sup program
