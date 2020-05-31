@@ -54,9 +54,6 @@ pub enum StandupCmd {
         irc_log_pattern: String,
     },
 
-    /// Attempt to push the standup log_path to its wiki
-    Push { log_path: PathBuf },
-
     /// Create standup notes for a new project
     New { project_code: String },
 }
