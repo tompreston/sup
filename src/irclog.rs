@@ -1,6 +1,5 @@
 use std::default::Default;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 use crate::standup_error::StandupError;
 
@@ -11,22 +10,20 @@ struct IrcLogLineWeechat {
     content: String,
 }
 
-impl IrcLogLineWeechat {
-    pub fn loglines_from_str(s: &str) -> Vec<Self> {
-        let mut loglines: Vec<Self> = Vec::new();
+impl FromStr for IrcLogLineWeechat {
+    type Err = StandupError;
 
-        for l in s.lines() {
-            let mut split = l.split("\t");
-            loglines.push(IrcLogLineWeechat {
-                datetime: split.next().unwrap_or("").to_string(),
-                username: split.next().unwrap_or("").to_string(),
-                content: split.next().unwrap_or("").to_string(),
-            });
-        }
-
-        loglines
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut split = s.split('\t');
+        Ok(Self {
+            datetime: split.next().unwrap_or("").to_string(),
+            username: split.next().unwrap_or("").to_string(),
+            content: split.next().unwrap_or("").to_string(),
+        })
     }
+}
 
+impl IrcLogLineWeechat {
     fn username(&self) -> &String {
         &self.username
     }
@@ -37,22 +34,13 @@ impl IrcLogLineWeechat {
 }
 
 #[derive(Debug, Default)]
-pub struct IrcLogWeechat {
-    lines: Vec<IrcLogLineWeechat>,
-    path: PathBuf,
+pub struct IrcLog<'a> {
+    log: &'a str,
 }
 
-impl IrcLogWeechat {
-    pub fn new<P: AsRef<Path>>(path: P, log: &str) -> Self {
-        Self {
-            lines: IrcLogLineWeechat::loglines_from_str(log),
-            path: path.as_ref().to_path_buf(),
-        }
-    }
-
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, StandupError> {
-        let log = fs::read_to_string(&path)?;
-        Ok(Self::new(path, log.as_str()))
+impl<'a> IrcLog<'a> {
+    pub fn new(log: &'a str) -> Self {
+        Self { log }
     }
 
     /// Find and print the last standup in the log.
@@ -63,19 +51,27 @@ impl IrcLogWeechat {
         end: &str,
     ) -> Result<(), StandupError> {
         // Mark the standup pattern locations, starting from the end of the log.
-        let mut log_rlines = self.lines.iter().rev();
-        let lrend = log_rlines
-            .position(|l| l.content.contains(end))
-            .ok_or(StandupError::IrcStandupNotFound(end.to_string()))?;
-        let lrdiscussion = log_rlines
-            .position(|l| l.content.contains(discussion))
-            .ok_or(StandupError::IrcStandupNotFound(discussion.to_string()))?;
-        let lrstart = log_rlines
-            .position(|l| l.content.contains(start))
-            .ok_or(StandupError::IrcStandupNotFound(start.to_string()))?;
+        let lrend = self
+            .log
+            .lines()
+            .rev()
+            .position(|l| l.contains(end))
+            .ok_or_else(|| StandupError::IrcStandupNotFound(end.to_string()))?;
+        let lrdiscussion = self
+            .log
+            .lines()
+            .rev()
+            .position(|l| l.contains(discussion))
+            .ok_or_else(|| StandupError::IrcStandupNotFound(discussion.to_string()))?;
+        let lrstart = self
+            .log
+            .lines()
+            .rev()
+            .position(|l| l.contains(start))
+            .ok_or_else(|| StandupError::IrcStandupNotFound(start.to_string()))?;
 
         // Reverse the indexes, to get the real standup position
-        let index_last = self.lines.len() - 1;
+        let index_last = self.log.lines().count() - 1;
         let lstart = index_last - lrstart;
         let ldiscussion = index_last - lrdiscussion;
         let lend = index_last - lrend;
@@ -89,14 +85,17 @@ impl IrcLogWeechat {
             ));
         }
 
-        dbg!(lstart, ldiscussion, lend);
-        for (i, line) in self.lines.iter().enumerate() {
-            if i < lstart || i > lend {
-                continue;
-            } else if i <= ldiscussion {
-                println!("{}", line.content());
-            } else {
-                println!("{}\t{}", line.username(), line.content());
+        for (i, l) in self.log.lines().enumerate() {
+            if i >= lstart && i <= lend {
+                let line: IrcLogLineWeechat = l.parse()?;
+                if i <= ldiscussion {
+                    if line.content().starts_with('#') {
+                        println!();
+                    }
+                    println!("{}", line.content());
+                } else {
+                    println!("    {}\t{}", line.username(), line.content());
+                }
             }
         }
 

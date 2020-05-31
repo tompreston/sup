@@ -9,7 +9,7 @@ mod irclog;
 mod standup_error;
 
 use cli::{StandupCmd, StandupOpt, StructOpt};
-use irclog::IrcLogWeechat;
+use irclog::IrcLog;
 use standup_error::StandupError;
 
 /// Returns path to standup notes generated from standup dir and project code
@@ -54,7 +54,8 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
     dbg!(irc_log_path);
 
-    let irc_log = IrcLogWeechat::from_file(irc_log_path)?;
+    let log_text = fs::read_to_string(&irc_log_path)?;
+    let irc_log = IrcLog::new(log_text.as_str());
     irc_log.print_last_standup(
         opt.sup_pattern_begin.as_str(),
         opt.sup_pattern_discussion.as_str(),
@@ -70,13 +71,15 @@ fn print_irc_logs(logs: Vec<PathBuf>) {
 
 fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
     let mut logs = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
-    if logs.len() == 0 {
-        Ok(println!("No IRC logs found"))
+    if logs.is_empty() {
+        println!("No IRC logs found");
+        Ok(())
     } else if logs.len() == 1 {
         format_irc_log(opt, &logs[0])
     } else {
         logs.sort();
-        Ok(print_irc_logs(logs))
+        print_irc_logs(logs);
+        Ok(())
     }
 }
 
