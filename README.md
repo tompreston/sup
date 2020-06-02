@@ -5,7 +5,7 @@ and is serves as a vehicle for learing Rust.
 
 Goals:
 - [ ] Replace the [sup script](https://github.com/tompreston/dotfiles/blob/master/local/bin/sup)
-- [ ] Push logs to wiki
+- ~~Push logs to wiki~~ Remove from scope, do in project-wiki Makefile
 - Support multiple IRC log formats
   - [ ] Weechat
   - [ ] Quassel
