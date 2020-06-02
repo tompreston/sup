@@ -46,8 +46,7 @@ pub enum StandupCmd {
         next_engineer: String,
     },
 
-    /// Scrape and print the last standup from this project's IRC log. Use the
-    /// pattern to select the log to scrape. See list command.
+    /// Scrape and print the last standup from this project's IRC log
     Format {
         #[structopt(default_value = "")]
         irc_log_pattern: String,
