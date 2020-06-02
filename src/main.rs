@@ -52,8 +52,6 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 
 /// Format the IRC log path
 fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
-    dbg!(irc_log_path);
-
     let log_text = fs::read_to_string(&irc_log_path)?;
     let irc_log = IrcLog::new(log_text.as_str());
     irc_log.print_last_standup(
@@ -85,8 +83,6 @@ fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
 
 /// Perform standup actions
 fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
-    dbg!(opt);
-
     match &opt.command {
         StandupCmd::Edit { project_code } => edit(
             opt.editor.as_str(),
