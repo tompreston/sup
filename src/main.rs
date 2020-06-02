@@ -100,7 +100,6 @@ fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
             next_engineer.as_str(),
         ),
         StandupCmd::Format { irc_log_pattern } => format(&opt, irc_log_pattern.as_str()),
-        _ => unimplemented!(),
     }?;
     Ok(())
 }

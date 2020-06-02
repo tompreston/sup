@@ -52,7 +52,4 @@ pub enum StandupCmd {
         #[structopt(default_value = "")]
         irc_log_pattern: String,
     },
-
-    /// Create standup notes for a new project
-    New { project_code: String },
 }
