@@ -16,3 +16,23 @@ Out of/removed from scope:
   ab001.md`, when it happens so infrequently.
 
 Contributions and review welcome.
+
+## Getting started
+The sup program expects the following environment variables:
+
+	export SUP_PATTERN_BEGIN="## Thomas Preston (tpreston)"
+	export SUP_DIR_IRC_LOGS="$WEECHAT_HOME/logs"
+	export SUP_DIR_NOTES="$HOME/w/standup"
+
+Install:
+
+	git clone https://github.com/tompreston/sup.git
+	cd sup
+	cargo install --path .
+
+Run:
+	
+	sup edit ab001
+	sup format
+	sup format ab001 "Discussion"
+	sup format celduin "William Salmon" > path/to/wiki/logs/standup-20200604.md
