@@ -1,16 +1,30 @@
 //! An IRC standup parser.
-use std::error::Error;
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 use std::process;
+use thiserror::Error;
 
 mod cli;
 mod irclog;
-mod standup_error;
 
 use cli::{StandupCmd, StandupOpt, StructOpt};
 use irclog::IrcLog;
-use standup_error::StandupError;
+
+#[derive(Error, Debug)]
+pub enum StandupError {
+    /// When an IO error occurrs
+    #[error("IO error, {0}")]
+    IO(io::Error),
+
+    /// When an IRC standup is not found
+    #[error("IRC standup not found, {0}")]
+    IrcStandupNotFound(String),
+
+    /// When the IRC standup position is invalid
+    #[error("IRC standup position is invalid, lstart {0}, ldiscussion {0}, lend {0}")]
+    IrcStandupPositionInvalid(usize, usize, usize),
+}
 
 /// Returns path to standup notes generated from standup dir and project code
 fn sup_notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
@@ -19,13 +33,16 @@ fn sup_notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
 
 /// Open the standup notes for editing
 fn edit(editor: &str, spath: PathBuf) -> Result<(), StandupError> {
-    process::Command::new(editor).arg(spath).status()?;
+    process::Command::new(editor)
+        .arg(spath)
+        .status()
+        .map_err(|e| StandupError::IO(e))?;
     Ok(())
 }
 
 /// Show the standup notes, followed by the next_engineer (search string)
 fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
-    let snotes = fs::read_to_string(spath)?;
+    let snotes = fs::read_to_string(spath).map_err(|e| StandupError::IO(e))?;
     println!("{}", snotes.trim());
 
     // Now print the next engineer name
@@ -43,7 +60,8 @@ fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
 
 /// Returns a vector of IRC log paths which match the pattern string
 fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBuf>, StandupError> {
-    Ok(fs::read_dir(sup_dir_irc_logs)?
+    Ok(fs::read_dir(sup_dir_irc_logs)
+        .map_err(|e| StandupError::IO(e))?
         .map(|res| res.map(|e| e.path()))
         .filter_map(|res| res.ok())
         .filter(|e| e.to_string_lossy().contains(pattern))
@@ -52,7 +70,7 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 
 /// Format the IRC log path
 fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
-    let log_text = fs::read_to_string(&irc_log_path)?;
+    let log_text = fs::read_to_string(&irc_log_path).map_err(|e| StandupError::IO(e))?;
     let irc_log = IrcLog::new(log_text.as_str());
     irc_log.print_last_standup(
         opt.sup_pattern_begin.as_str(),
@@ -78,7 +96,7 @@ fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
 }
 
 /// Perform standup actions
-fn run_standup_action(opt: &StandupOpt) -> Result<(), Box<dyn Error>> {
+fn run_standup_action(opt: &StandupOpt) -> Result<(), StandupError> {
     match &opt.command {
         StandupCmd::Edit { project_code } => edit(
             opt.editor.as_str(),

@@ -1,7 +1,7 @@
 use std::default::Default;
 use std::str::FromStr;
 
-use crate::standup_error::StandupError;
+use crate::StandupError;
 
 #[derive(Debug)]
 struct IrcLogLineWeechat {
