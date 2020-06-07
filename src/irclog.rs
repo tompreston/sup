@@ -30,28 +30,22 @@ pub fn print_last_standup(
     discussion: &str,
     end: &str,
 ) -> Result<(), StandupError> {
-    // Mark the standup pattern locations, starting from the end of the log.
-    let lrend = irc_log
-        .lines()
-        .rev()
-        .position(|l| l.contains(end))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(end.to_string()))?;
-    let lrdiscussion = irc_log
-        .lines()
-        .rev()
-        .position(|l| l.contains(discussion))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(discussion.to_string()))?;
-    let lrstart = irc_log
-        .lines()
-        .rev()
-        .position(|l| l.contains(start))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(start.to_string()))?;
+    // Read all of the lines, rposition requires std::iter::ExactSizeIterator
+    let lines: Vec<&str> = irc_log.lines().collect();
 
-    // Reverse the indexes, to get the real standup position
-    let index_last = irc_log.lines().count() - 1;
-    let lstart = index_last - lrstart;
-    let ldiscussion = index_last - lrdiscussion;
-    let lend = index_last - lrend;
+    // Mark the standup pattern locations, starting from the end of the log.
+    let lstart = lines
+        .iter()
+        .rposition(|l| l.contains(start))
+        .ok_or_else(|| StandupError::IrcStandupNotFound(start.to_string()))?;
+    let ldiscussion = lines
+        .iter()
+        .rposition(|l| l.contains(discussion))
+        .ok_or_else(|| StandupError::IrcStandupNotFound(discussion.to_string()))?;
+    let lend = lines
+        .iter()
+        .rposition(|l| l.contains(end))
+        .ok_or_else(|| StandupError::IrcStandupNotFound(end.to_string()))?;
 
     let valid_pos: bool = lstart < ldiscussion && ldiscussion < lend;
     if !valid_pos {
