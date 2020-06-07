@@ -75,7 +75,6 @@ pub fn print_last_standup(
         irc_log_lines.push(line);
     }
 
-    // Print the irc_log_lines
     for line in irc_log_lines {
         println!("{}", line)
     }
