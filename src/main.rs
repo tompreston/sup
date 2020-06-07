@@ -1,4 +1,5 @@
 //! An IRC standup parser.
+
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -9,8 +10,8 @@ mod cli;
 mod irclog;
 
 use cli::{StandupCmd, StandupOpt, StructOpt};
-use irclog::IrcLog;
 
+/// Some errors which might occur when running sup
 #[derive(Error, Debug)]
 pub enum StandupError {
     /// When an IO error occurrs
@@ -71,8 +72,8 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 /// Format the IRC log path
 fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
     let log_text = fs::read_to_string(&irc_log_path).map_err(StandupError::IO)?;
-    let irc_log = IrcLog::new(log_text.as_str());
-    irc_log.print_last_standup(
+    irclog::print_last_standup(
+        log_text.as_str(),
         opt.sup_pattern_begin.as_str(),
         opt.sup_pattern_discussion.as_str(),
         opt.sup_pattern_end.as_str(),
