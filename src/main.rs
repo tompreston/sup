@@ -61,22 +61,18 @@ fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), Standu
     )
 }
 
-fn print_irc_logs(logs: Vec<PathBuf>) {
-    for l in logs {
-        println!("{}", l.to_string_lossy())
-    }
-}
-
 fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
-    let mut logs = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
-    if logs.is_empty() {
-        println!("No IRC logs found");
+    let mut lpaths = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
+    if lpaths.is_empty() {
+        println!("No IRC log paths found");
         Ok(())
-    } else if logs.len() == 1 {
-        format_irc_log(opt, &logs[0])
+    } else if lpaths.len() == 1 {
+        format_irc_log(opt, &lpaths[0])
     } else {
-        logs.sort();
-        print_irc_logs(logs);
+        lpaths.sort();
+        for lpath in lpaths {
+            println!("{}", lpath.to_string_lossy());
+        }
         Ok(())
     }
 }
