@@ -36,13 +36,13 @@ fn edit(editor: &str, spath: PathBuf) -> Result<(), StandupError> {
     process::Command::new(editor)
         .arg(spath)
         .status()
-        .map_err(|e| StandupError::IO(e))?;
+        .map_err(StandupError::IO)?;
     Ok(())
 }
 
 /// Show the standup notes, followed by the next_engineer (search string)
 fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
-    let snotes = fs::read_to_string(spath).map_err(|e| StandupError::IO(e))?;
+    let snotes = fs::read_to_string(spath).map_err(StandupError::IO)?;
     println!("{}", snotes.trim());
 
     // Now print the next engineer name
@@ -61,7 +61,7 @@ fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
 /// Returns a vector of IRC log paths which match the pattern string
 fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBuf>, StandupError> {
     Ok(fs::read_dir(sup_dir_irc_logs)
-        .map_err(|e| StandupError::IO(e))?
+        .map_err(StandupError::IO)?
         .map(|res| res.map(|e| e.path()))
         .filter_map(|res| res.ok())
         .filter(|e| e.to_string_lossy().contains(pattern))
@@ -70,7 +70,7 @@ fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBu
 
 /// Format the IRC log path
 fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
-    let log_text = fs::read_to_string(&irc_log_path).map_err(|e| StandupError::IO(e))?;
+    let log_text = fs::read_to_string(&irc_log_path).map_err(StandupError::IO)?;
     let irc_log = IrcLog::new(log_text.as_str());
     irc_log.print_last_standup(
         opt.sup_pattern_begin.as_str(),
