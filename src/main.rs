@@ -18,9 +18,9 @@ pub enum StandupError {
     #[error("IO error, {0}")]
     IO(io::Error),
 
-    /// When an IRC standup is not found
-    #[error("IRC standup not found, {0}")]
-    IrcStandupNotFound(String),
+    /// When a string is not found in a standup log
+    #[error("string not found, {0}")]
+    StringNotFound(String),
 
     /// When the IRC standup position is invalid
     #[error("IRC standup position is invalid, lstart {0}, ldiscussion {0}, lend {0}")]

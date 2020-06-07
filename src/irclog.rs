@@ -38,6 +38,14 @@ impl fmt::Display for IrcLogLine {
     }
 }
 
+/// Returns the position of the needle &str in haystack Vec, starting from right
+fn rpos_str(haystack: &Vec<&str>, needle: &str) -> Result<usize, StandupError> {
+    haystack
+        .iter()
+        .rposition(|l| l.contains(needle))
+        .ok_or_else(|| StandupError::StringNotFound(needle.to_string()))
+}
+
 /// Find and print the last standup in the log.
 pub fn print_last_standup(
     irc_log: &str,
@@ -45,22 +53,10 @@ pub fn print_last_standup(
     discussion: &str,
     end: &str,
 ) -> Result<(), StandupError> {
-    // Read all of the lines, rposition requires std::iter::ExactSizeIterator
     let lines: Vec<&str> = irc_log.lines().collect();
-
-    // Mark the standup pattern locations, starting from the end of the log
-    let lstart = lines
-        .iter()
-        .rposition(|l| l.contains(start))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(start.to_string()))?;
-    let ldiscussion = lines
-        .iter()
-        .rposition(|l| l.contains(discussion))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(discussion.to_string()))?;
-    let lend = lines
-        .iter()
-        .rposition(|l| l.contains(end))
-        .ok_or_else(|| StandupError::IrcStandupNotFound(end.to_string()))?;
+    let lstart = rpos_str(&lines, start)?;
+    let ldiscussion = rpos_str(&lines, discussion)?;
+    let lend = rpos_str(&lines, end)?;
 
     let valid_pos: bool = lstart < ldiscussion && ldiscussion < lend;
     if !valid_pos {
