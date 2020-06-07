@@ -4,13 +4,13 @@ use crate::StandupError;
 use std::str::FromStr;
 
 #[derive(Debug)]
-struct IrcLogLineWeechat {
+struct IrcLogLine {
     datetime: String,
     username: String,
     content: String,
 }
 
-impl FromStr for IrcLogLineWeechat {
+impl FromStr for IrcLogLine {
     type Err = StandupError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -20,16 +20,6 @@ impl FromStr for IrcLogLineWeechat {
             username: split.next().unwrap_or("").to_string(),
             content: split.next().unwrap_or("").to_string(),
         })
-    }
-}
-
-impl IrcLogLineWeechat {
-    fn username(&self) -> &String {
-        &self.username
-    }
-
-    fn content(&self) -> &String {
-        &self.content
     }
 }
 
@@ -74,14 +64,14 @@ pub fn print_last_standup(
 
     for (i, l) in irc_log.lines().enumerate() {
         if i >= lstart && i <= lend {
-            let line: IrcLogLineWeechat = l.parse()?;
+            let line: IrcLogLine = l.parse()?;
             if i <= ldiscussion {
-                if line.content().starts_with('#') {
+                if line.content.starts_with('#') {
                     println!();
                 }
-                println!("{}", line.content());
+                println!("{}", line.content);
             } else {
-                println!("    {}\t{}", line.username(), line.content());
+                println!("    {}\t{}", line.username, line.content);
             }
         }
     }
