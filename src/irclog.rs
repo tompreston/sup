@@ -39,7 +39,7 @@ impl fmt::Display for IrcLogLine {
 }
 
 /// Returns the position of the needle &str in haystack Vec, starting from right
-fn rpos_str(haystack: &Vec<&str>, needle: &str) -> Result<usize, StandupError> {
+fn rpos_str(haystack: &[&str], needle: &str) -> Result<usize, StandupError> {
     haystack
         .iter()
         .rposition(|l| l.contains(needle))
