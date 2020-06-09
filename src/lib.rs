@@ -71,12 +71,13 @@ fn rpos_str(haystack: &[&str], needle: &str) -> Result<usize, StandupError> {
         .ok_or_else(|| StandupError::StringNotFound(needle.to_string()))
 }
 
-/// Find and print the last standup in the irc log, then write it to something.
-pub fn print_last_standup(
+/// Find the last standup in the irc log, then write it to something.
+pub fn write_last_standup(
     irc_log: &str,
     start: &str,
     discussion: &str,
     end: &str,
+    mut writer: impl io::Write,
 ) -> Result<(), StandupError> {
     let lines: Vec<&str> = irc_log.lines().collect();
     let lstart = rpos_str(&lines, start)?;
@@ -101,7 +102,9 @@ pub fn print_last_standup(
     }
 
     for line in irc_log_lines {
-        println!("{}", line)
+        writer
+            .write(format!("{}\n", line).as_bytes())
+            .map_err(StandupError::IO)?;
     }
 
     Ok(())

@@ -39,11 +39,12 @@ fn format(opt: &StandupOpt, pattern: &str) -> Result<(), sup::StandupError> {
 
     if lpaths.len() == 1 {
         let log_text = fs::read_to_string(&lpaths[0]).map_err(StandupError::IO)?;
-        sup::print_last_standup(
+        sup::write_last_standup(
             log_text.as_str(),
             opt.sup_pattern_begin.as_str(),
             opt.sup_pattern_discussion.as_str(),
             opt.sup_pattern_end.as_str(),
+            std::io::stdout(),
         )
     } else {
         lpaths.sort();
