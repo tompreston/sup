@@ -133,6 +133,19 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_irc_log_line() {
+        // TODO how do I get tabs which test in here?
+        let text = "2020-06-09 16:56:38     tpreston    foobar";
+        // TODO lose this unwrap
+        let irc_log_line: IrcLogLine = text.parse().unwrap();
+
+        assert_eq!(irc_log_line.datetime, "2020-06-09 16:56:38");
+        assert_eq!(irc_log_line.username, "tpreston");
+        assert_eq!(irc_log_line.content, "foobar");
+        assert_eq!(irc_log_line.in_discussion, true);
+    }
+
+    #[test]
     fn test_notes_path() {
         assert_eq!(
             notes_path("/foo/bar", "ab001"),
