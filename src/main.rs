@@ -3,7 +3,7 @@
 use sup::cli::{StandupCmd, StandupOpt, StructOpt};
 
 /// Perform standup actions
-fn run_standup_action(opt: &StandupOpt) -> Result<(), sup::StandupError> {
+fn run_action(opt: &StandupOpt) -> Result<(), sup::StandupError> {
     match &opt.command {
         StandupCmd::Edit { project_code } => sup::edit(
             opt.editor.as_str(),
@@ -24,7 +24,7 @@ fn run_standup_action(opt: &StandupOpt) -> Result<(), sup::StandupError> {
 /// Parse the arguments, run the program and return sensible errors.
 fn main() {
     let opt = StandupOpt::from_args();
-    std::process::exit(match run_standup_action(&opt) {
+    std::process::exit(match run_action(&opt) {
         Ok(_) => 0,
         Err(err) => {
             eprintln!("sup: error: {}", err);
