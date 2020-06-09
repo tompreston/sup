@@ -60,7 +60,8 @@ impl fmt::Display for IrcLogLine {
     }
 }
 
-/// Returns the position of the needle &str in haystack Vec, starting from right
+/// Returns the position of the needle &str in haystack Vec, starting from the
+/// right. This is used to find the index of the last standup in an ordered log.
 fn rpos_str(haystack: &[&str], needle: &str) -> Result<usize, StandupError> {
     haystack
         .iter()
