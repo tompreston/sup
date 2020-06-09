@@ -7,13 +7,13 @@ fn run_action(opt: &StandupOpt) -> Result<(), sup::StandupError> {
     match &opt.command {
         StandupCmd::Edit { project_code } => sup::edit(
             opt.editor.as_str(),
-            sup::standup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
+            sup::notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
         ),
         StandupCmd::Show {
             project_code,
             next_engineer,
         } => sup::show(
-            sup::standup_notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
+            sup::notes_path(opt.sup_dir_notes.as_str(), project_code.as_str()),
             next_engineer.as_str(),
         ),
         StandupCmd::Format { irc_log_pattern } => sup::format(&opt, irc_log_pattern.as_str()),

@@ -105,7 +105,7 @@ fn print_last_standup(
 }
 
 /// Returns path to standup notes generated from standup dir and project code
-pub fn standup_notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
+pub fn notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
     Path::new(sup_dir_notes).join(format!("{}.md", project_code))
 }
 
@@ -178,13 +178,13 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_sup_notes_path() {
+    fn test_notes_path() {
         assert_eq!(
-            standup_notes_path("/foo/bar", "ab001"),
+            notes_path("/foo/bar", "ab001"),
             PathBuf::from("/foo/bar/ab001.md")
         );
         assert_ne!(
-            standup_notes_path("/foo/bar", "ab001"),
+            notes_path("/foo/bar", "ab001"),
             PathBuf::from("/foo/bar/ab001.txt")
         );
     }
