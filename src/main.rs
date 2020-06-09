@@ -21,15 +21,13 @@ fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
     println!("{}", snotes.trim());
 
     // Now print the next engineer name
-    let next_engs: Vec<&str> = snotes
+    snotes
         .lines()
         .filter(|l| l.starts_with('#'))
         .filter(|l| l.contains(next_engineer))
-        .collect();
-    for e in next_engs.iter() {
-        println!("{}", e);
-    }
-
+        .collect::<Vec<&str>>()
+        .iter()
+        .for_each(|e| println!("{}", e));
     Ok(())
 }
 
