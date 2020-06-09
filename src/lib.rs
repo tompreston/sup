@@ -1,12 +1,10 @@
 //! Functions and data structures for parsing IRC standup logs
 
 pub mod cli;
-use cli::StandupOpt;
 use std::fmt;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::process;
 use std::str::FromStr;
 use thiserror::Error;
 
@@ -24,6 +22,10 @@ pub enum StandupError {
     /// When the IRC standup position is invalid
     #[error("IRC standup position is invalid, lstart {0}, ldiscussion {0}, lend {0}")]
     IrcStandupPositionInvalid(usize, usize, usize),
+
+    /// When no IRC logs are found
+    #[error("No IRC log paths found matching {0}")]
+    NoIrcLogPathsFound(String),
 }
 
 #[derive(Debug)]
@@ -69,8 +71,8 @@ fn rpos_str(haystack: &[&str], needle: &str) -> Result<usize, StandupError> {
         .ok_or_else(|| StandupError::StringNotFound(needle.to_string()))
 }
 
-/// Find and print the last standup in the log.
-fn print_last_standup(
+/// Find and print the last standup in the irc log, then write it to something.
+pub fn print_last_standup(
     irc_log: &str,
     start: &str,
     discussion: &str,
@@ -110,68 +112,17 @@ pub fn notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
     Path::new(sup_dir_notes).join(format!("{}.md", project_code))
 }
 
-/// Open the standup notes for editing
-pub fn edit(editor: &str, spath: PathBuf) -> Result<(), StandupError> {
-    process::Command::new(editor)
-        .arg(spath)
-        .status()
-        .map_err(StandupError::IO)?;
-    Ok(())
-}
-
-/// Show the standup notes, followed by the next_engineer (search string)
-pub fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
-    let snotes = fs::read_to_string(spath).map_err(StandupError::IO)?;
-    println!("{}", snotes.trim());
-
-    // Now print the next engineer name
-    let next_engs: Vec<&str> = snotes
-        .lines()
-        .filter(|l| l.starts_with('#'))
-        .filter(|l| l.contains(next_engineer))
-        .collect();
-    for e in next_engs.iter() {
-        println!("{}", e);
-    }
-
-    Ok(())
-}
-
 /// Returns a vector of IRC log paths which match the pattern string
-fn find_irc_log_path(sup_dir_irc_logs: &str, pattern: &str) -> Result<Vec<PathBuf>, StandupError> {
+pub fn find_irc_log_path(
+    sup_dir_irc_logs: &str,
+    pattern: &str,
+) -> Result<Vec<PathBuf>, StandupError> {
     Ok(fs::read_dir(sup_dir_irc_logs)
         .map_err(StandupError::IO)?
         .map(|res| res.map(|e| e.path()))
         .filter_map(|res| res.ok())
         .filter(|e| e.to_string_lossy().contains(pattern))
         .collect())
-}
-
-/// Format the IRC log path
-fn format_irc_log(opt: &StandupOpt, irc_log_path: &PathBuf) -> Result<(), StandupError> {
-    let log_text = fs::read_to_string(&irc_log_path).map_err(StandupError::IO)?;
-    print_last_standup(
-        log_text.as_str(),
-        opt.sup_pattern_begin.as_str(),
-        opt.sup_pattern_discussion.as_str(),
-        opt.sup_pattern_end.as_str(),
-    )
-}
-
-pub fn format(opt: &StandupOpt, pattern: &str) -> Result<(), StandupError> {
-    let mut lpaths = find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
-    if lpaths.is_empty() {
-        println!("No IRC log paths found");
-        Ok(())
-    } else if lpaths.len() == 1 {
-        format_irc_log(opt, &lpaths[0])
-    } else {
-        lpaths.sort();
-        for lpath in lpaths {
-            println!("{}", lpath.to_string_lossy());
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
