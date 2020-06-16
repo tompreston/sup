@@ -1,21 +1,20 @@
 # Standup parser
 sup is an IRC standup parser. It aims to replace the
 [sup script](https://github.com/tompreston/dotfiles/blob/426d3bb430830fd4423e768f29eac9cdbd88115d/local/bin/sup)
-and also serves as a vehicle for learning Rust.
+and also serves as a vehicle for learning Rust - so please pull me up on
+anything which is nonidiomatic.
 
-Goals:
+Tasks:
 - [x] Replace the [sup script](https://github.com/tompreston/dotfiles/blob/master/local/bin/sup)
 - Support multiple IRC log formats
-- [x] Weechat
-- [ ] Quassel
-- [ ] irssi
+    - [x] Weechat
+    - [ ] Quassel
+    - [ ] irssi
 
 Out of/removed from scope:
 - Push standup logs to wiki. This logic should live in a Makefile in the wiki.
 - Create new standup notes. Not much point automating a `cp sup-template.md
   ab001.md`, when it happens so infrequently.
-
-Contributions and review welcome.
 
 ## Getting started
 The sup program expects the following environment variables:
@@ -30,9 +29,19 @@ Install:
 	cd sup
 	cargo install --path .
 
-Run:
+Edit project standup notes throughout the day:
 	
 	sup edit ab001
+
+Print project standup notes, for pasting in IRC standup:
+
+	sup show ab001 Discussion
+	sup show ab001 Di
+	sup show ab001 William Salmon
+	sup show ab001 W
+
+Print formatted project standup notes, for pasting in the project wiki:
+
 	sup format
-	sup format ab001 "Discussion"
-	sup format celduin "William Salmon" > path/to/wiki/logs/standup-20200604.md
+	sup format ab001
+	sup format celduin > path/to/wiki/logs/2020-06-04-standup.md
