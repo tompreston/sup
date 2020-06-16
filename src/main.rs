@@ -31,8 +31,22 @@ fn show(spath: PathBuf, next_engineer: &str) -> Result<(), StandupError> {
     Ok(())
 }
 
+/// Returns a vector of IRC log PathBuf's which match the pattern string
+fn filter_irc_log_pathbufs(
+    sup_dir_irc_logs: &str,
+    pattern: &str,
+) -> Result<Vec<PathBuf>, StandupError> {
+    Ok(fs::read_dir(sup_dir_irc_logs)
+        .map_err(StandupError::IO)?
+        .map(|res| res.map(|e| e.path()))
+        .filter_map(|res| res.ok())
+        .filter(|e| e.to_string_lossy().contains(pattern))
+        .collect())
+}
+
+/// Search for the IRC log matching pattern, then print the last IRC standup
 fn format(opt: &StandupOpt, pattern: &str) -> Result<(), sup::StandupError> {
-    let mut lpaths = sup::find_irc_log_path(opt.sup_dir_irc_logs.as_str(), pattern)?;
+    let mut lpaths = filter_irc_log_pathbufs(opt.sup_dir_irc_logs.as_str(), pattern)?;
     if lpaths.is_empty() {
         return Err(sup::StandupError::NoIrcLogPathsFound(pattern.to_string()));
     }

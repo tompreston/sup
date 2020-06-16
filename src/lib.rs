@@ -2,7 +2,6 @@
 
 pub mod cli;
 use std::fmt;
-use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -122,19 +121,6 @@ pub fn write_last_standup(
 /// ```
 pub fn notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
     Path::new(sup_dir_notes).join(format!("{}.md", project_code))
-}
-
-/// Returns a vector of IRC log paths which match the pattern string
-pub fn find_irc_log_path(
-    sup_dir_irc_logs: &str,
-    pattern: &str,
-) -> Result<Vec<PathBuf>, StandupError> {
-    Ok(fs::read_dir(sup_dir_irc_logs)
-        .map_err(StandupError::IO)?
-        .map(|res| res.map(|e| e.path()))
-        .filter_map(|res| res.ok())
-        .filter(|e| e.to_string_lossy().contains(pattern))
-        .collect())
 }
 
 #[cfg(test)]
