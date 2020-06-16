@@ -111,6 +111,15 @@ pub fn write_last_standup(
 }
 
 /// Returns path to standup notes generated from standup dir and project code
+///
+/// # Example
+///
+/// ```
+/// # use sup::notes_path;
+/// # use std::path::PathBuf;
+/// let path = notes_path("/foo/bar", "ab001");
+/// assert_eq!(path, PathBuf::from("/foo/bar/ab001.md"));
+/// ```
 pub fn notes_path(sup_dir_notes: &str, project_code: &str) -> PathBuf {
     Path::new(sup_dir_notes).join(format!("{}.md", project_code))
 }
@@ -150,18 +159,6 @@ mod test {
         assert_eq!(rpos_str(&haystack, "bar").ok(), Some(3));
         assert_eq!(rpos_str(&haystack, "baz").ok(), Some(2));
         assert!(rpos_str(&haystack, "bong").is_err());
-    }
-
-    #[test]
-    fn test_notes_path() {
-        assert_eq!(
-            notes_path("/foo/bar", "ab001"),
-            PathBuf::from("/foo/bar/ab001.md")
-        );
-        assert_ne!(
-            notes_path("/foo/bar", "ab001"),
-            PathBuf::from("/foo/bar/ab001.txt")
-        );
     }
 
     #[test]
