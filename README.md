@@ -10,6 +10,9 @@ Tasks:
     - [x] Weechat
     - [ ] Quassel
     - [ ] irssi
+- [ ] Add clap (structopt) alias for single letter variants. I should be able
+  to do `sup e ab001` instead of `sup edit ab001`, and so on.
+  https://docs.rs/clap/2.33.1/clap/struct.App.html#method.alias
 
 Out of/removed from scope:
 - Push standup logs to wiki. This logic should live in a Makefile in the wiki.
