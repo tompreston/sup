@@ -36,9 +36,11 @@ pub struct StandupOpt {
 #[derive(StructOpt, Debug)]
 pub enum StandupCmd {
     /// Edit the standup notes for the given project
+    #[structopt(alias = "e")]
     Edit { project_code: String },
 
     /// Print a project's standup notes and append the next engineer's name
+    #[structopt(alias = "s")]
     Show {
         project_code: String,
 
@@ -47,6 +49,7 @@ pub enum StandupCmd {
     },
 
     /// Scrape and print the last standup from this project's IRC log
+    #[structopt(alias = "f")]
     Format {
         #[structopt(default_value = "")]
         irc_log_pattern: String,
