@@ -1,0 +1,22 @@
+{% if name_header -%}
+## {{ name_header.name }} ({{ name_header.username }})
+{% endif -%}
+* Done:
+{%- for item in done %}
+  - {{ item }}
+{%- endfor %}
+* Doing:
+{%- for item in doing %}
+  - {{ item }}
+{%- endfor %}
+* Next:
+{%- for item in next %}
+  - {{ item }}
+{%- endfor %}
+* Backlog:
+{%- for item in backlog %}
+  - {{ item }}
+{%- endfor %}
+{%- if name_tail %}
+## {{ name_tail.name }} {% if name_tail.username %}({{ name_tail.username }}){% endif %}
+{%- endif %}
