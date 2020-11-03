@@ -1,6 +1,6 @@
 """sup prototype
 New sup will only parse single standup.yaml and report single project markdown.
-I want to do it in Rust, yaml-serde, templates (tinytemplate or handlebars).
+I want to do it in Rust using yaml-serde and tera.
 """
 import argparse
 import jinja2
