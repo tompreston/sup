@@ -1,5 +1,5 @@
-{% if name_header -%}
-## {{ name_header.name }} ({{ name_header.username }})
+{% if me -%}
+## {{ me.name }} ({{ me.username }})
 {% endif -%}
 * Done:
 {%- for item in done %}
@@ -17,6 +17,6 @@
 {%- for item in backlog %}
   - {{ item }}
 {%- endfor %}
-{%- if name_tail %}
-## {{ name_tail.name }} {% if name_tail.username %}({{ name_tail.username }}){% endif %}
+{%- if next %}
+## {{ next.name }} {% if next.username %}({{ next.username }}){% endif %}
 {%- endif %}
