@@ -1,4 +1,9 @@
-# Standup parser
+# Standup parser (archived)
+No code is better, just store standups as pre-formatted text and copy-paste using ctrl+shift block
+copy.
+
+---
+
 sup is an IRC standup parser. It aims to replace the
 [sup script](https://github.com/tompreston/dotfiles/blob/426d3bb430830fd4423e768f29eac9cdbd88115d/local/bin/sup)
 and also serves as a vehicle for learning Rust - so please pull me up on
