@@ -17,6 +17,8 @@
 {%- for item in backlog %}
   - {{ item }}
 {%- endfor %}
-{%- if next %}
-## {{ next.name }} {% if next.username %}({{ next.username }}){% endif %}
+{%- if next_person.name == "Discussion" %}
+# Discussion
+{%- elif next_person %}
+## {{ next_person.name }} {% if next_person.username %}({{ next_person.username }}){% endif %}
 {%- endif %}

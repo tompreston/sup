@@ -34,8 +34,8 @@ def pr_standup(args):
 
     if args.me:
         standup["me"] = ME
-    if args.next:
-        standup["next"] = get_member(args.next, standup["members"])
+    if args.next_person:
+        standup["next_person"] = get_member(args.next_person, standup["members"])
 
     tloader = jinja2.FileSystemLoader("templates")
     tenv = jinja2.Environment(loader=tloader, lstrip_blocks=True)
@@ -48,7 +48,7 @@ def get_args():
     parser.add_argument("project", help="Project Code")
     parser.add_argument("-m", "--me", help="Print standup ",
                         action="store_true")
-    parser.add_argument("-n", "--next", help="Next person")
+    parser.add_argument("-n", "--next-person", help="Next person")
     return parser.parse_args()
 
 if __name__ == "__main__":
